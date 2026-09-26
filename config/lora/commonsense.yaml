@@ -1,0 +1,31 @@
+# Rank 16 LoRA baseline for the commonsense task.
+mode: lora
+train_config:
+  batch_size: 4
+  micro_batch_size: 4
+  num_epochs: 1
+  lr: 0.0001
+  weight_decay: 0.0
+  max_length: 256
+  val_set_size: 0
+  eval_step: 200
+  save_step: 200
+  use_gradient_checkpointing: false
+  train_on_inputs: false
+test_config:
+  test_batch_size: 16
+  test_dataset_ids: ''
+  merge: true
+lora_config:
+  rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: qkv
+  dtype: bf16
+datamode: commonsense
+model: ../../meta-llama/Meta-Llama-3-8B
+data_path: ./dataset/commonsense/commonsense_170k.json
+output_dir: ./log/lora/commonsense
+seed: 42
+finetune: true
+evaluate: true

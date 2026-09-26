@@ -1,0 +1,42 @@
+# Run stage 1 first; rerun with --regra_config.stage=2 for stage 2.
+mode: regra
+train_config:
+  batch_size: 2
+  micro_batch_size: 2
+  num_epochs: 2
+  lr: 0.0001
+  weight_decay: 0.0
+  max_length: 256
+  val_set_size: 0
+  eval_step: 200
+  save_step: 200
+  use_gradient_checkpointing: false
+  train_on_inputs: false
+test_config:
+  test_batch_size: 16
+  test_dataset_ids: ''
+  merge: true
+lora_config:
+  rank: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: qkv
+  dtype: bf16
+regra_config:
+  stage: 1
+  stage2_lr: 0.0001
+  projection_mode: dns
+  orth_lambda: 0.1
+  orth_warmup_steps: 100
+  basis_eps: 1.0e-07
+  gradient_rank: 16
+  gradient_batches: 8
+  gradient_batch_size: 2
+  gradient_svd_niter: 4
+datamode: math
+model: ../../meta-llama/Meta-Llama-3-8B
+data_path: ./dataset/math/math_7k.json
+output_dir: ./log/regra/math
+seed: 42
+finetune: true
+evaluate: true

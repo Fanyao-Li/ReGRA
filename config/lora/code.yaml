@@ -1,0 +1,35 @@
+# Rank 16 LoRA baseline; evaluates MBPP+ after training.
+mode: lora
+train_config:
+  batch_size: 4
+  micro_batch_size: 1
+  num_epochs: 1
+  lr: 2.0e-05
+  weight_decay: 0.0
+  max_length: 1024
+  val_set_size: 10000
+  code_max_train_samples: null
+  eval_step: 5000
+  save_step: 5000
+  use_gradient_checkpointing: false
+  train_on_inputs: false
+test_config:
+  test_batch_size: 1
+  test_dataset_ids: ''
+  merge: true
+  mbpp_version: default
+  code_force_base_prompt: true
+  code_max_new_tokens: 768
+lora_config:
+  rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: qkv
+  dtype: bf16
+datamode: code
+model: ../../meta-llama/Meta-Llama-3-8B
+data_path: ./dataset/code/CodeFeedback-Filtered-Instruction.jsonl
+output_dir: ./log/lora/code
+seed: 42
+finetune: true
+evaluate: true

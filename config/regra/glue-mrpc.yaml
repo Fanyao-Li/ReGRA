@@ -1,0 +1,49 @@
+# Run ReGRA stage 1 first, then override --regra_config.stage=2.
+mode: regra
+train_config:
+  batch_size: 32
+  micro_batch_size: 4
+  num_epochs: 20
+  lr: 0.0002
+  weight_decay: 0.0
+  max_length: 128
+  val_set_size: 0
+  eval_step: 100
+  save_step: 100
+  use_gradient_checkpointing: false
+  train_on_inputs: false
+  glue_cache_dir: ./dataset/glue
+  glue_max_train_samples: null
+  glue_max_eval_samples: null
+  glue_pad_to_max_length: false
+  glue_validation_ratio: 0.0
+test_config:
+  test_batch_size: 32
+  test_dataset_ids: ''
+  merge: true
+  adapter_path: null
+lora_config:
+  rank: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: query,key,value
+  dtype: bf16
+regra_config:
+  stage: 1
+  stage2_lr: 5.0e-05
+  projection_mode: dns
+  orth_lambda: 0.1
+  orth_warmup_steps: 100
+  basis_eps: 1.0e-07
+  gradient_rank: 16
+  gradient_batches: 8
+  gradient_batch_size: 32
+  gradient_svd_niter: 4
+datamode: glue
+glue_task: mrpc
+data_path: ./dataset/GLUE/MRPC
+model: ../../reberta-large
+output_dir: ./log/regra/glue-mrpc
+seed: 42
+finetune: true
+evaluate: true

@@ -1,0 +1,38 @@
+# GLUE/QNLI LoRA baseline.
+mode: lora
+train_config:
+  batch_size: 32
+  micro_batch_size: 4
+  num_epochs: 3
+  lr: 0.0002
+  weight_decay: 0.0
+  max_length: 128
+  val_set_size: 0
+  eval_step: 500
+  save_step: 500
+  use_gradient_checkpointing: false
+  train_on_inputs: false
+  glue_cache_dir: ./dataset/glue
+  glue_max_train_samples: null
+  glue_max_eval_samples: null
+  glue_pad_to_max_length: false
+  glue_validation_ratio: 0.0
+test_config:
+  test_batch_size: 32
+  test_dataset_ids: ''
+  merge: true
+  adapter_path: null
+lora_config:
+  rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: query,key,value
+  dtype: bf16
+datamode: glue
+glue_task: qnli
+data_path: ./dataset/GLUE/QNLI
+model: ../../reberta-large
+output_dir: ./log/lora/glue-qnli
+seed: 42
+finetune: true
+evaluate: true

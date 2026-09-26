@@ -1,0 +1,42 @@
+# DNS calibration randomly samples from the mixed commonsense training file.
+mode: regra
+train_config:
+  batch_size: 4
+  micro_batch_size: 4
+  num_epochs: 1
+  lr: 0.0001
+  weight_decay: 0.0
+  max_length: 256
+  val_set_size: 0
+  eval_step: 200
+  save_step: 200
+  use_gradient_checkpointing: false
+  train_on_inputs: false
+test_config:
+  test_batch_size: 16
+  test_dataset_ids: ''
+  merge: true
+lora_config:
+  rank: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: qkv
+  dtype: bf16
+regra_config:
+  stage: 1
+  stage2_lr: 1.0e-05
+  projection_mode: dns
+  orth_lambda: 0.1
+  orth_warmup_steps: 100
+  basis_eps: 1.0e-07
+  gradient_rank: 32
+  gradient_batches: 16
+  gradient_batch_size: 4
+  gradient_svd_niter: 4
+datamode: commonsense
+model: ../../meta-llama/Meta-Llama-3-8B
+data_path: ./dataset/commonsense/commonsense_170k.json
+output_dir: ./log/regra/commonsense
+seed: 42
+finetune: true
+evaluate: true
