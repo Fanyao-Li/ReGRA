@@ -44,6 +44,65 @@ Local task data lives under `dataset/`:
 | Code | `dataset/code/CodeFeedback-Filtered-Instruction.jsonl` | EvalPlus MBPP+ base and enhanced tests |
 | GLUE | Saved datasets under `dataset/GLUE/` | Labeled validation splits |
 
+### Dataset downloads
+
+The paths below are relative to this directory. The math and commonsense files
+in this checkout use the [LLM-Adapters training files](https://github.com/AGI-Edgerunners/LLM-Adapters/tree/main/ft-training_set)
+and its [task datasets](https://github.com/AGI-Edgerunners/LLM-Adapters/tree/main/dataset):
+
+| Data | Download source | Expected local path |
+| --- | --- | --- |
+| Math training (`math_7k.json`) | [LLM-Adapters math_7k.json](https://github.com/AGI-Edgerunners/LLM-Adapters/blob/main/ft-training_set/math_7k.json) | `dataset/math/math_7k.json` |
+| Math evaluation (GSM8K, AQuA, SVAMP, AddSub, MultiArith, SingleEq) | [LLM-Adapters task datasets](https://github.com/AGI-Edgerunners/LLM-Adapters/tree/main/dataset) | `dataset/math/<task>/test.json` |
+| Commonsense training (`commonsense_170k.json`) | [LLM-Adapters commonsense_170k.json](https://github.com/AGI-Edgerunners/LLM-Adapters/blob/main/ft-training_set/commonsense_170k.json) | `dataset/commonsense/commonsense_170k.json` |
+| Commonsense evaluation (BoolQ, PIQA, Social IQA, HellaSwag, WinoGrande, ARC-Easy, ARC-Challenge, OpenBookQA) | [LLM-Adapters task datasets](https://github.com/AGI-Edgerunners/LLM-Adapters/tree/main/dataset) | `dataset/commonsense/<task>/test.json` |
+| Code training | [CodeFeedback-Filtered-Instruction](https://huggingface.co/datasets/m-a-p/CodeFeedback-Filtered-Instruction/tree/main) | `dataset/code/CodeFeedback-Filtered-Instruction.jsonl` |
+| Code evaluation | [EvalPlus MBPP+](https://github.com/evalplus/evalplus) | Downloaded and cached automatically by EvalPlus during evaluation |
+| GLUE (CoLA, SST-2, MRPC, STS-B, QQP, MNLI, QNLI, RTE, WNLI) | [nyu-mll/glue](https://huggingface.co/datasets/nyu-mll/glue) | `dataset/GLUE/<task>/` for the first eight tasks; WNLI loads from Hugging Face |
+
+To recreate the math and commonsense layout from LLM-Adapters:
+
+```bash
+git clone --depth 1 https://github.com/AGI-Edgerunners/LLM-Adapters.git /tmp/LLM-Adapters
+mkdir -p dataset/math dataset/commonsense
+cp /tmp/LLM-Adapters/ft-training_set/math_7k.json dataset/math/
+cp /tmp/LLM-Adapters/ft-training_set/commonsense_170k.json dataset/commonsense/
+for task in gsm8k AQuA SVAMP AddSub MultiArith SingleEq; do
+  cp -r "/tmp/LLM-Adapters/dataset/$task" dataset/math/
+done
+for task in boolq piqa social_i_qa hellaswag winogrande ARC-Easy ARC-Challenge openbookqa; do
+  cp -r "/tmp/LLM-Adapters/dataset/$task" dataset/commonsense/
+done
+```
+
+Download the CodeFeedback JSONL file using its
+[direct download link](https://huggingface.co/datasets/m-a-p/CodeFeedback-Filtered-Instruction/resolve/main/CodeFeedback-Filtered-Instruction.jsonl):
+
+```bash
+mkdir -p dataset/code
+curl -L --fail \
+  https://huggingface.co/datasets/m-a-p/CodeFeedback-Filtered-Instruction/resolve/main/CodeFeedback-Filtered-Instruction.jsonl \
+  -o dataset/code/CodeFeedback-Filtered-Instruction.jsonl
+```
+
+To save the eight GLUE tasks in the format expected by the local configs, run:
+
+```bash
+../../env/Malora/bin/python - <<'PY'
+from datasets import load_dataset
+
+for task, directory in {
+    "cola": "CoLA", "sst2": "SST-2", "mrpc": "MRPC", "stsb": "STS-B",
+    "qqp": "QQP", "mnli": "MNLI", "qnli": "QNLI", "rte": "RTE",
+}.items():
+    load_dataset("nyu-mll/glue", task).save_to_disk(f"dataset/GLUE/{directory}")
+PY
+```
+
+The WNLI configs download `nyu-mll/glue` directly on first use. Code evaluation
+uses EvalPlus MBPP+ `v0.2.0` by default; the local `dataset/code/MBPP*.parquet`
+files are not used by the evaluator.
+
 There are 12 configs each in `config/lora/` and `config/regra/`: `math.yaml`,
 `commonsense.yaml`, `code.yaml`, and `glue-<task>.yaml` for CoLA, SST-2, MRPC,
 STS-B, QQP, MNLI, QNLI, RTE, and WNLI. WNLI uses `nyu-mll/glue` because this
