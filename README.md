@@ -1,2 +1,2 @@
 # ReGRA
-a solution 偶发
+a solution of two stage training about lora
